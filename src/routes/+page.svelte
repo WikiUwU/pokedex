@@ -1,10 +1,8 @@
 <script>
 	import { loop_guard } from "svelte/internal";
-    let resultAmount = 25;
-    let promise = getPokedexData(resultAmount);
 
-    async function getPokedexData(amount = 1) {
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${amount}`, {method: "GET"});
+    async function getPokedexData(query) {
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon${query}`, {method: "GET"});
         const data = await res.json();
 
         if (res.ok) {
@@ -13,9 +11,19 @@
             throw new Error(data)
         }
     }
+    let promise = getPokedexData("?limit=25");
+    let queryType = "entryAmount";
+    let input;
 
-    function handleInput(amount) {
-        promise = getPokedexData(amount);
+    function handleInput(query) {
+
+        if (isNaN(parseInt(query))) {
+            promise = getPokedexData(`/${query}`); 
+        }else {
+            const resultAmount = parseInt(query)
+            promise = getPokedexData(`?limit=${resultAmount < 1 ? 25 : resultAmount}`);
+        }
+
     }
 </script>
 
@@ -80,8 +88,20 @@
 
     <h1>Pokedex App</h1>
 
-    <p>Please enter the amount of entry's to display or search for a specific pokemon:</p>
-    <input class="result-amount-selection" type="number" min="25" bind:value={resultAmount} on:input={handleInput(resultAmount < 1 ? resultAmount = 1 : resultAmount)}> 
+    <div>
+        <input type="radio" name="inputType" id="entryAmount" value="entryAmount" checked>
+        <label for="">Enter amount of pokemon entry's to show</label>
+        <input type="radio" name="inputType" id="pokemonSearch" value="pokemonSearch">
+        <label for="">Search for a specific pokemon (name or id)</label>
+    </div>
+
+    {#if queryType === "entryAmount"}
+        <input class="result-amount-selection" type="number" min="25" bind:value={input} on:input={handleInput(input)}> 
+    {:else if queryType === "pokemonSearch"}
+        <input class="result-amount-selection" type="text" bind:value={input} on:input={handleInput(input)}> 
+    {/if}
+
+    
 
 
     <div class="pokemon-list">
