@@ -8,7 +8,7 @@
  -->
 
 <script>
-	import { validate_each_argument } from "svelte/internal";
+    import { onMount } from 'svelte';
     import PokedexEntryList from "./pokedexEntryList.svelte";
     import PokemonSearch from "./pokemonSearch.svelte";
 
