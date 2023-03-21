@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
     export let pokedex_id
 
     let promise;
@@ -76,4 +76,4 @@
         </ul>
         
     </div>
-{/await}
+{/await} -->

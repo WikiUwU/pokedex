@@ -11,10 +11,9 @@
             
  -->
 <script>
-	import UserPokedexEntry from './UserPokedexEntry.svelte';
+	// import UserPokedexEntry from './UserPokedexEntry.svelte';
 	import userPokedex from '../stores.js';
     import { onMount } from 'svelte';
-	import PokemonSearch from '../PokemonSearch.svelte';
 
 	let promise;
 	let input;
@@ -23,13 +22,13 @@
 
 	// Send a GET request over to the 'backend' (+server.js API Endpoint) to get data from MySQL database
 	// SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC;
-	async function getUserPokedexData() {
-		const res = await fetch(
-			'/api/mysql-conn?query=SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC'
-		);
-		const data = await res.json();
-		return data[0];
-	}
+	// async function getUserPokedexData() {
+	// 	const res = await fetch(
+	// 		'/api/mysql-conn?query=SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC'
+	// 	);
+	// 	const data = await res.json();
+	// 	return data[0];
+	// }
 
 	// Send a POST request over to the 'backend' (+server.js API Endpoint) to post data to the MySQL database
 	async function addNewPokemonToUserPokedex(pokedex_id) {
@@ -90,11 +89,24 @@
 
 
 
+    function addToStore(pokedexEntry) {
+        const newUserPokedexStoreData = [...$userPokedex, pokedexEntry];
+        userPokedex.set(newUserPokedexStoreData);
+        console.log($userPokedex)
+    }
+
+
     onMount(() => {
         if ($userPokedex === '') {
             fetch('/api/mysql-conn?query=SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC')
             .then(res => res.json())
-            .then(data => userPokedex.set(data[0]));
+            .then(data => {
+                for (let i = 0; i < data[0].length; i++) {
+                    fetch(`https://pokeapi.co/api/v2/pokemon/${data[0][i].pokedex_id}`)
+                        .then(res => res.json())
+                        .then(data => addToStore(data));
+                }
+            });
         }
     });
 
@@ -131,8 +143,36 @@
 		{/each}
 	{/await} -->
 
-    {#each $userPokedex as userPokedexEntry}
+    <!-- {#each $userPokedex as userPokedexEntry}
         <UserPokedexEntry pokedex_id={userPokedexEntry.pokedex_id} />
+    {/each} -->
+
+    {#each $userPokedex as userPokedexEntry}
+        <div class="pokemon-entry">
+
+            <h2 class="pokemon-name">{
+                userPokedexEntry.name.charAt(0).toUpperCase() + userPokedexEntry.name.slice(1)
+            }</h2>
+
+            <img class="pokemon-image" src={userPokedexEntry.sprites.other['official-artwork'].front_default} alt="Image of {userPokedexEntry.name}">
+
+            <ul class="pokemon-stats">
+                <li>PokedexID: {userPokedexEntry.id}</li>
+                <li>Weight: {Number(userPokedexEntry.weight) / 10} kg</li> 
+                <li>Height: {Number(userPokedexEntry.height) * 10} cm</li>
+                <li>Base Experience: {userPokedexEntry.base_experience}</li>
+                <li>
+                    Abilities:
+                    <ul>
+                        {#each userPokedexEntry.abilities as ability}
+                            <li>{ability.ability.name} {#if ability.is_hidden} <span> - Hidden Ability</span>{/if}</li> 
+                            
+                        {/each}
+                    </ul>
+                </li>
+            </ul>
+            
+        </div>
     {/each}
 
 </div>
@@ -178,4 +218,32 @@
 	.add-new-pokemon * {
 		margin-bottom: 1rem;
 	}
+
+    .pokemon-entry {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        border: 2px solid black;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .pokemon-image {
+        width: 300px;
+        height: 300px;
+    }
+
+    .pokemon-stats {
+        display: none;
+        position: absolute;
+        width: 300px;
+        top: 0;
+        left: 300px;
+    }
+
+    .pokemon-image:hover + .pokemon-stats{
+        display: flex;
+        flex-direction: column;
+    }
 </style>
