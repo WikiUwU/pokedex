@@ -8,9 +8,8 @@
  -->
 
 <script>
-    import { onMount } from 'svelte';
-    import PokedexEntryList from "./pokedexEntryList.svelte";
-    import PokemonSearch from "./pokemonSearch.svelte";
+    import PokedexEntryList from "./PokedexEntryList.svelte";
+    import PokemonSearch from "./PokemonSearch.svelte";
 
     let queryType = "entryAmount";
 </script>
@@ -18,6 +17,18 @@
 
 
 <style>
+     * {
+        font-family: monospace;
+    }
+
+    nav {
+        display: flex;
+        justify-content: center;
+    }
+
+    a {
+        padding: 0 1rem;
+    }
 
     .wrapper{
         display: flex;

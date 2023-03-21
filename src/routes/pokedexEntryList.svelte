@@ -1,5 +1,5 @@
 <script>
-    import PokemonEntryStats from "./pokemonEntryStats.svelte";
+    import PokemonEntryStats from "./PokemonEntryStats.svelte";
 
     async function getPokedexData(entryAmount) {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${entryAmount}`, {method: "GET"});
@@ -77,7 +77,7 @@
                 <img class="pokemon-image" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{i + 1}.png" alt={entry.name}>
 
                 <div class="show-pokemon-stats">
-                    <PokemonEntryStats pokemonID={i+1}/>
+                    <PokemonEntryStats pokedex_id={i+1}/>
                 </div>
 
             </div>

@@ -1,5 +1,5 @@
 <script>
-    export let pokemonID;
+    export let pokedex_id;
 
     async function getPokemonData(id) {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {method: "GET"});
@@ -12,7 +12,7 @@
             }
     };
 
-    let promise = getPokemonData(pokemonID);
+    let promise = getPokemonData(pokedex_id);
 
 </script>
 
@@ -30,7 +30,7 @@
 
 {#await promise then pokemonData}
     <ul class="pokemon-stats">
-        <li>PokedexID: {pokemonID}</li>
+        <li>PokedexID: {pokedex_id}</li>
         <li>Weight: {Number(pokemonData.weight) / 10} kg</li> 
         <li>Height: {Number(pokemonData.height) * 10} cm</li>
         <li>Base Experience: {pokemonData.base_experience}</li>

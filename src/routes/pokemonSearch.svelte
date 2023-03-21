@@ -99,3 +99,31 @@
         
     {/await}
 </div>
+
+<!-- 
+
+    userPokedex = [
+        {
+            pokedex_id: 1,
+            name: 'bulbasaur',
+            weight: 69,
+            height: 7,
+            base_experience: 64,
+            abilities: [
+                {
+                    name: overgrow,
+                    is_hidden: false
+                },
+                {
+                    name: chlorophyll,
+                    is_hidden: true
+                }
+            ]
+        }, 
+        {
+            ...
+        }
+    ]
+
+
+ -->

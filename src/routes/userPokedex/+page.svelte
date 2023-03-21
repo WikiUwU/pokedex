@@ -6,112 +6,176 @@
                      - ein eigener Pokedex, wo man die einem selber bekannten Pokemons eintragen kann
                             -> die Einträge (oder zumindest die PokemonID der jeweils bekannten Pokemons) irgendwie Sessionübergreifend speichern
                                     -> localStorage ODER ein Backend 'aufsetzen' und darüber auf eine Datenbank (MySQL/SQLite/MongoDB) zugreifen und dort speichern -> nach Node Paackages schauen, 
-                                    womit ich fast kein richtiges backend brauche ...oder Laravel als backend aufsetzen
-    
-    
+                                    womit ich fast kein richtiges backend brauche ...oder Laravel als backend aufsetzen 
+                    -Möglichkeit Pokemons aus dem eigenen Pokedex zu entfernen (warum man auch immer das tun würde)
             
  -->
-
 <script>
-    async function getUserPokedexData() {
-        const res = await fetch('/api/mysql-conn?query=SELECT * from `test`');
-        const data = await res.json();
-        promise = data[0];
-    }
+	import UserPokedexEntry from './UserPokedexEntry.svelte';
+	import userPokedex from '../stores.js';
+    import { onMount } from 'svelte';
+	import PokemonSearch from '../PokemonSearch.svelte';
 
-    async function addNewPokemonToPokedex(pokedex_id) {
+	let promise;
+	let input;
 
-        if (isNaN(pokedex_id)) {
-            return "The pokemon you want to add doesn't exist"
+
+
+	// Send a GET request over to the 'backend' (+server.js API Endpoint) to get data from MySQL database
+	// SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC;
+	async function getUserPokedexData() {
+		const res = await fetch(
+			'/api/mysql-conn?query=SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC'
+		);
+		const data = await res.json();
+		return data[0];
+	}
+
+	// Send a POST request over to the 'backend' (+server.js API Endpoint) to post data to the MySQL database
+	async function addNewPokemonToUserPokedex(pokedex_id) {
+		if (isNaN(pokedex_id)) {
+			alert("The pokemon you want to add doesn't exist");
+			return;
+		}
+
+		const query = `INSERT INTO \`test\` (\`pokedex_id\`) VALUES`;
+
+		const res = await fetch('/api/mysql-conn', {
+			method: 'POST',
+			body: JSON.stringify({ query, pokedex_id }),
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		const data = await res.json();
+		return data;
+	}
+
+	async function addPokemon(nameORid) {
+		// Check if the pokemon the user wants to add actually exists by making a call to the Pokedex API and checking the response
+		if (Number(nameORid) < 1 || isNaN(Number(nameORid))) {
+			alert("Please enter a valid pokemon name or it's ID");
+			return;
+		}
+
+		const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameORid}`, { method: 'GET' });
+
+		if (!res.ok) {
+			alert("Please enter a valid pokemon name or it's ID");
+			return;
+		}
+
+		const pokedexData = await res.json();
+
+        const newUserPokedexData = [...$userPokedex, {pokedex_id: pokedexData.id}]
+        newUserPokedexData.sort((a, b) => a.pokedex_id - b.pokedex_id);
+        userPokedex.set(newUserPokedexData);
+        console.log($userPokedex)
+
+
+
+		let databaseResponse = await addNewPokemonToUserPokedex(pokedexData.id);
+
+		if (databaseResponse === 'This pokemon is already part of your pokedex') {
+			alert(databaseResponse);
+		} else {
+			alert(
+				`${
+					pokedexData.name.charAt(0).toUpperCase() + pokedexData.name.slice(1)
+				} was sucessfully added to your pokedex`
+			);
+		}
+	}
+
+
+
+    onMount(() => {
+        if ($userPokedex === '') {
+            fetch('/api/mysql-conn?query=SELECT `pokedex_id` FROM `pokedex`.`test` ORDER BY `pokedex_id` ASC')
+            .then(res => res.json())
+            .then(data => userPokedex.set(data[0]));
         }
+    });
 
-        const query = `INSERT INTO \`test\` (\`pokedex_id\`) VALUES`;
-
-        const res = await fetch('/api/mysql-conn', {
-            method: 'POST',
-            body: JSON.stringify({ query, pokedex_id }),
-            headers: {
-                'content-type': 'application/json'
-            }
-        });
-
-        const data = await res.json();
-        return data
-    }
-
-
-
-    async function addPokemon(nameORid) {
-
-        if (Number(nameORid) < 1 || isNaN(Number(nameORid))) {
-            console.log("Please enter a valid pokemon name or it's ID");
-            return
-        }
-
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameORid}`, {method: "GET"});
-
-        if (!res.ok) {
-            console.log("Please enter a valid pokemon name or it's ID");
-            return
-        }
-
-        const pokedexData = await res.json();
-
-        return addNewPokemonToPokedex(pokedexData.id);
-    }
-    
-
-    let promise = getUserPokedexData();
 </script>
 
 
 
-<style>
-    .wrapper{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        font-family: monospace;
-        overflow: hidden;
-    }
-
-    h1 {
-        font-size: 2.5rem;
-        text-decoration: underline;
-    }
-
-    /* .add-new-pokemon {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .add-new-pokemon * {
-        margin-bottom: 1rem;
-    } */
-
-</style>
 
 
 <nav>
-    <a href="/">Pokedex</a>
-    <a href="/userPokedex">User Pokedex</a>
+	<a href="/">Pokedex</a>
+	<a href="/userPokedex">User Pokedex</a>
 </nav>
 
 <div class="wrapper">
+	<h1>User Pokedex</h1>
 
-    <h1>User Pokedex</h1>
+	<!-- <button on:click={addItem}>+</button> -->
 
-    <!-- <div class="add-new-pokemon">
-        <label for="addPokemonInput">Enter the pokemon's name or id you wish to add to your pokedex:</label>
-        <input type="text" name="addPokemonInput" id="addPokemonInput" bind:value={input}>
+	<form class="add-new-pokemon">
+		<label for="addPokemonInput"
+			>Enter the pokemon's name or id you wish to add to your pokedex:</label
+		>
+		<input type="text" name="addPokemonInput" id="addPokemonInput" bind:value={input} />
 
-        <button on:click={addPokemon(input)}>Add new pokemon to your pokedex</button>
-    </div> -->
-    
-    {#await promise}
-        <p>...waiting</p>
-    {:then  res}
-        {console.log(res)}
-    {/await}
+		<button on:click={addPokemon(input)}>Add new pokemon to your pokedex</button>
+	</form>
+
+	<!-- {#await promise}
+		<p>...waiting</p>
+	{:then userPokedexData}
+		{#each userPokedexData as userPokedexEntry}
+			<UserPokedexEntry pokedex_id={userPokedexEntry.pokedex_id} />
+		{/each}
+	{/await} -->
+
+    {#each $userPokedex as userPokedexEntry}
+        <UserPokedexEntry pokedex_id={userPokedexEntry.pokedex_id} />
+    {/each}
+
 </div>
+
+
+
+
+
+
+
+<style>
+	* {
+		font-family: monospace;
+	}
+
+	nav {
+		display: flex;
+		justify-content: center;
+	}
+
+	a {
+		padding: 0 1rem;
+	}
+
+	.wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	h1 {
+		font-size: 2.5rem;
+		text-decoration: underline;
+	}
+
+	.add-new-pokemon {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.add-new-pokemon * {
+		margin-bottom: 1rem;
+	}
+</style>

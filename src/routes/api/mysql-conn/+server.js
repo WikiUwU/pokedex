@@ -20,7 +20,7 @@ export async function GET( { url } ) {
 
     const results = await (await connection).execute(url.searchParams.get('query'));
 
-    console.log(results)
+    // console.log(results)
     return json(results);
 }
 
@@ -33,10 +33,10 @@ export async function POST( { request } ) {
     doesExist = doesExist[0][0][`EXISTS(SELECT * FROM test WHERE pokedex_id ='${pokedex_id}')`]
     
     if (doesExist) {
-        console.log('it exists');
+        // console.log('it exists');
         return json('This pokemon is already part of your pokedex')
     }else {
-        console.log('such an entry does not exist in the table row,  adding new entry')
+        // console.log('such an entry does not exist in the table row,  adding new entry')
         const res = await (await connection).execute(`${query} ('${pokedex_id}')`);
         return json(res)
     }
