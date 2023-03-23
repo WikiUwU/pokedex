@@ -13,10 +13,6 @@ console.log('...creating a connection to mySQL...');
 
 
 export async function GET( { url } ) {
-    // const response = await fetch(url.searchParams.get('conn'));
-    // const data = await response.json();
-
-    // return json(data.slice(0, 100))
 
     const results = await (await connection).execute(url.searchParams.get('query'));
 
