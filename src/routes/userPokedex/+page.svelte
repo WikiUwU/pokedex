@@ -98,7 +98,6 @@
         const newUserPokedexStoreData = [...$userPokedex, pokedexEntry];
 		newUserPokedexStoreData.sort((a, b) => a.id - b.id);
         userPokedex.set(newUserPokedexStoreData);
-        console.log($userPokedex)
     }
 
 
@@ -141,9 +140,10 @@
 		<button on:click|preventDefault={addPokemon(input)} >Add new pokemon to your pokedex</button>
 	</form>
 
+
 	<!--Replaced by saving the entry data of each pokemon in the userPokedex into localStorage, removing the need to fetch the data on every page reload
 		
-		{#await promise}
+	{#await promise}
 		<p>...waiting</p>
 	{:then userPokedexData}
 		{#each userPokedexData as userPokedexEntry}

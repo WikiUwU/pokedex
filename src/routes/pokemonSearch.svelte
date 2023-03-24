@@ -1,5 +1,5 @@
 <script>
-    async function getpokemonData(nameORid) {
+    async function getPokedexEntry(nameORid) {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameORid}`, {method: "GET"});
 
             if (res.ok) {
@@ -11,7 +11,7 @@
     };
     let input;
     let debounceTimer;
-    let promise = getpokemonData(25);
+    let promise = getPokedexEntry(25);
 
     function handleInput(nameORid) {
         clearTimeout(debounceTimer);
@@ -25,7 +25,7 @@
         }
 
         debounceTimer = setTimeout(()=> {
-            promise = getpokemonData(nameORid)
+            promise = getPokedexEntry(nameORid)
         }, 1000);
     };
 
@@ -70,24 +70,24 @@
 <div>
     {#await promise}
         ...waiting...please enter the id or name of the pokemon you would like to search
-    {:then pokemonData}
+    {:then pokedexEntry}
         <div class="pokemon-entry">
 
             <h2 class="pokemon-name">{
-                pokemonData.name.charAt(0).toUpperCase() + pokemonData.name.slice(1)
+                pokedexEntry.name.charAt(0).toUpperCase() + pokedexEntry.name.slice(1)
             }</h2>
     
-            <img class="pokemon-image" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemonData.id}.png" alt="Image of {pokemonData.name}">
+            <img class="pokemon-image" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokedexEntry.id}.png" alt="Image of {pokedexEntry.name}">
 
             <ul class="pokemon-stats">
-                <li>PokedexID: {pokemonData.id}</li>
-                <li>Weight: {Number(pokemonData.weight) / 10} kg</li> 
-                <li>Height: {Number(pokemonData.height) * 10} cm</li>
-                <li>Base Experience: {pokemonData.base_experience}</li>
+                <li>PokedexID: {pokedexEntry.id}</li>
+                <li>Weight: {Number(pokedexEntry.weight) / 10} kg</li> 
+                <li>Height: {Number(pokedexEntry.height) * 10} cm</li>
+                <li>Base Experience: {pokedexEntry.base_experience}</li>
                 <li>
                     Abilities:
                     <ul>
-                        {#each pokemonData.abilities as ability}
+                        {#each pokedexEntry.abilities as ability}
                             <li>{ability.ability.name} {#if ability.is_hidden} <span> - Hidden Ability</span>{/if}</li> 
                             
                         {/each}
