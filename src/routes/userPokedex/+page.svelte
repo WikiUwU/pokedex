@@ -7,7 +7,10 @@
                             -> die Einträge (oder zumindest die PokemonID der jeweils bekannten Pokemons) irgendwie Sessionübergreifend speichern
                                     -> localStorage ODER ein Backend 'aufsetzen' und darüber auf eine Datenbank (MySQL/SQLite/MongoDB) zugreifen und dort speichern -> nach Node Paackages schauen, 
                                     womit ich fast kein richtiges backend brauche ...oder Laravel als backend aufsetzen 
+
+
                     -Möglichkeit Pokemons aus dem eigenen Pokedex zu entfernen (warum man auch immer das tun würde)
+                    -Filteroptionen für die Pokedex Listenanzeige (sowohl im User-Pokedex als auch im Allwissenden)
             
  -->
 <script>
