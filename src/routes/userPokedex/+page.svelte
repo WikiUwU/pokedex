@@ -56,9 +56,13 @@
 
 	async function addPokemon(nameORid) {
 		// Check if the pokemon the user wants to add actually exists by making a call to the Pokedex API and checking the response
-		if (Number(nameORid) < 1 || isNaN(Number(nameORid))) {
+		if (Number(nameORid) < 1) {
 			alert("Please enter a valid pokemon name or it's ID");
 			return;
+		}
+
+		if (isNaN(Number(nameORid))) {
+			nameORid = nameORid.toLowerCase();
 		}
 
 		const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameORid}`, { method: 'GET' });
@@ -70,18 +74,16 @@
 
 		const pokedexData = await res.json();
 
-        const newUserPokedexData = [...$userPokedex, {pokedex_id: pokedexData.id}]
-        newUserPokedexData.sort((a, b) => a.pokedex_id - b.pokedex_id);
-        userPokedex.set(newUserPokedexData);
-        console.log($userPokedex)
-
-
 
 		let databaseResponse = await addNewPokemonToUserPokedex(pokedexData.id);
 
 		if (databaseResponse === 'This pokemon is already part of your pokedex') {
 			alert(databaseResponse);
 		} else {
+			const newUserPokedexData = [...$userPokedex, pokedexData]
+			newUserPokedexData.sort((a, b) => a.id - b.id);
+			userPokedex.set(newUserPokedexData);
+			console.log($userPokedex)
 			alert(
 				`${
 					pokedexData.name.charAt(0).toUpperCase() + pokedexData.name.slice(1)
@@ -94,6 +96,7 @@
 
     function addToStore(pokedexEntry) {
         const newUserPokedexStoreData = [...$userPokedex, pokedexEntry];
+		newUserPokedexStoreData.sort((a, b) => a.id - b.id);
         userPokedex.set(newUserPokedexStoreData);
         console.log($userPokedex)
     }
@@ -135,10 +138,12 @@
 		>
 		<input type="text" name="addPokemonInput" id="addPokemonInput" bind:value={input} />
 
-		<button on:click={addPokemon(input)}>Add new pokemon to your pokedex</button>
+		<button on:click|preventDefault={addPokemon(input)} >Add new pokemon to your pokedex</button>
 	</form>
 
-	<!-- {#await promise}
+	<!--Replaced by saving the entry data of each pokemon in the userPokedex into localStorage, removing the need to fetch the data on every page reload
+		
+		{#await promise}
 		<p>...waiting</p>
 	{:then userPokedexData}
 		{#each userPokedexData as userPokedexEntry}
